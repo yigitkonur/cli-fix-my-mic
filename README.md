@@ -26,6 +26,7 @@ https://github.com/user-attachments/assets/6e24f816-4b3c-4b60-929d-e47be2871238
 - **finds built-in mic by transport type** — works on MacBook Pro, Air, iMac, Mac Mini, Mac Studio
 - **blocks Bluetooth input** — classic, LE, and iPhone Continuity mic. USB mics left alone
 - **defeats AirPods HFP flip-backs** — re-asserts built-in mic every 0.5s for 5 seconds after a change, then goes idle
+- **single instance** — a lock file stops a second daemon from fighting the first over the default device
 - **Apple Unified Logging** — uses `os_log`, system handles rotation
 
 ## install
