@@ -611,10 +611,15 @@ if args.count > 1 {
 // The kernel releases the flock when the process dies, so no stale-lock cleanup is needed.
 try? FileManager.default.createDirectory(atPath: pauseDir, withIntermediateDirectories: true)
 let lockFD = open("\(pauseDir)/daemon.lock", O_CREAT | O_RDWR, 0o644)
-if lockFD < 0 || flock(lockFD, LOCK_EX | LOCK_NB) != 0 {
-    log("Another mic-guard daemon is already running — exiting")
-    printCLI("mic-guard: another daemon is already running — exiting")
-    exit(0)
+if lockFD < 0 {
+    logError("Cannot open lock file (errno \(errno)) — running without single-instance lock")
+} else if flock(lockFD, LOCK_EX | LOCK_NB) != 0 {
+    if errno == EWOULDBLOCK {
+        log("Another mic-guard daemon is already running — exiting")
+        printCLI("mic-guard: another daemon is already running — exiting")
+        exit(0)
+    }
+    logError("flock failed (errno \(errno)) — running without single-instance lock")
 }
 
 setupSignalHandlers()
