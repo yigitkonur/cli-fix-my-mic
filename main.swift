@@ -622,6 +622,20 @@ if lockFD < 0 {
     logError("flock failed (errno \(errno)) — running without single-instance lock")
 }
 
+// The HAL delivers notifications on the main CFRunLoop by default, but dispatchMain()
+// never runs it, so the daemon's device/stream info goes stale after a while and
+// it enforces against an outdated device list. NULL tells the HAL to use its own thread.
+var halRunLoop: CFRunLoop? = nil
+var halRunLoopAddress = AudioObjectPropertyAddress(
+    mSelector: kAudioHardwarePropertyRunLoop,
+    mScope: kAudioObjectPropertyScopeGlobal,
+    mElement: kAudioObjectPropertyElementMain
+)
+AudioObjectSetPropertyData(
+    AudioObjectID(kAudioObjectSystemObject), &halRunLoopAddress, 0, nil,
+    UInt32(MemoryLayout<CFRunLoop?>.size), &halRunLoop
+)
+
 setupSignalHandlers()
 printDiagnostics()
 registerListeners()
